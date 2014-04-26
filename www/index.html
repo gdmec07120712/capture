@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet"  href="css/jquery.mobile-1.4.2.min.css">
+		<script type="text/javascript" src="js/jquery-2.0.2.min.js"></script>
+		<script type="text/javascript" src="js/jquery.mobile-1.4.2.min.js"></script>
+		<script type="text/javascript" src="cordova.js"></script>
+		<script type="text/javascript" >
+            //var durationmax =5;
+            var limition=2;
+            var mediaTimer=null;
+			var mediaPath='http://aijavatool.duapp.com/xiami/1769834090/Flower-Dance.mp3';
+            function funcCaptureVideo(){
+                navigator.device.capture.captureVideo(captureSuccess, captureError,{limit:limition});
+            }
+            function funcCaptureAudio(){
+                navigator.device.capture.captureAudio(captureSuccess, captureError,{limit:limition});
+            }
+            function funcCaptureImage(){
+                navigator.device.capture.captureImage(captureSuccess, captureError,{limit: limition});
+            }
+            // 采集操作成功完成后的回调函数
+            function captureSuccess(mediaFiles) {
+                var i, len;
+                var mediatype;
+                mediatype = mediaFiles[0].type.substr(0,5);
+                clearInterval(mediaTimer);
+                mediaTimer = null;
+                //随机播放照片
+                if (mediatype=="image"){
+                    mediaTimer = setInterval(function(){$("#mypic").attr("src",mediaFiles[Math.floor(Math.random() * ( limition + 1))].fullPath);} ,durationmax*1000);
+                }
+                //遍历MediaFile数组对象，显示最后的一个视频
+                for (i = 0, len = mediaFiles.length; i < len; i += 1) {
+                    mediatype = mediaFiles[i].type.substr(0,5);
+                    if (mediatype=="video"){
+                        $("#myvideo").attr("src",mediaFiles[i].fullPath);
+                    }
+					
+					if (mediatype=="audio"){
+						//获取地址，去掉"file:"
+                        mediaPath = mediaFiles[i].fullPath.substr(5);
+						$("#myaudio").attr("src",mediaFiles[i].fullPath);
+                    }
+                }
+            }
+            // 采集操作出错后的回调函数
+            function captureError(error) {
+                var msg = '捕获时发生错误: ' + error.code;
+                alert(msg);
+            }
+			
+			// 音频播放函数
+			function playAudio(url) {
+				// Play the audio file at url
+				console.log("音频文件地址:"+url);
+				var my_media = new Media(url,
+					// success callback
+					function() {
+						console.log("playAudio():Audio Success");
+					},
+					// error callback
+					function(err) {
+						console.log("playAudio():Audio Error: "+err);
+				});
+				// Play audio
+				my_media.play();
+			}
+			
+        </script>
+    </head>
+    <body>
+		<div data-role="page" id="media-capture">
+            <div data-role="header">
+                <h1>Capture 实例</h1>
+            </div>
+            <div data-role="content">
+                <div data-role="controlgroup"  data-type="horizontal" >
+                    <a href="#"  data-role="button" id="captureVideo" onclick="funcCaptureVideo()">Capture Video</a>
+                    <a href="#"  data-role="button" id="captureAudio" onclick="funcCaptureAudio()">Capture Audio</a>
+                    <a href="#"  data-role="button" id="captureImage" onclick="funcCaptureImage()">Capture Image</a>
+                </div>
+                <div >
+				
+					<audio id="myaudio" src="" controls="controls"></audio>
+					
+		
+                    <a href="#" data-role="button" onclick="playAudio(mediaPath);">Play Audio</a>
+                </div>
+                <div >
+                    <video id="myvideo"  src="" controls="controls" height="240" width="320" autoplay="autoplay"></video>
+                </div>
+                <div>
+                    <img id="mypic" height="240" width="320" src="" />
+                </div>
+            </div>
+            <div data-role="footer">
+                <h2>Copyright H.T</h2>
+            </div>
+        </div>
+	</body>
+
+</html>
